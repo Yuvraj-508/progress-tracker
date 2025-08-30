@@ -2,7 +2,7 @@ import React from 'react'
 
 function App() {
   return (
-    <div>hello progess tracker</div>
+    <div>hello! progress tracker</div>
   )
 }
 
