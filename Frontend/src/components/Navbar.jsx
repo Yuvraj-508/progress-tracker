@@ -15,12 +15,21 @@ export default function Navbar() {
       <div className="hidden md:flex items-center space-x-4">
         <NavLink to='/task' className=" bg-white text-blue-600 px-4 py-2 rounded-lg">
           Task
+
+        </button>
+        <button className="bg-white text-blue-600 px-4 py-2 rounded-lg">
+          Update 
+        </button>
+
+        <button className="bg-white text-blue-600 px-4 py-2 rounded-lg ">
+
         </NavLink>
         <NavLink to='/upload' className="bg-white text-blue-600 px-4 py-2 rounded-lg ">
           Upload
         </NavLink>
 
         <NavLink to='/progress' className="bg-white text-blue-600 px-4 py-2 rounded-lg  ">
+
          Progress
         </NavLink>
       </div>
