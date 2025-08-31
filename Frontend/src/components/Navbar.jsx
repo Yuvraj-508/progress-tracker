@@ -2,7 +2,7 @@ import React from "react"
 
 export default function Navbar() {
   return (
-    <body>
+    
     <nav className="w-full bg-white shadow-md px-6 py-3 flex items-center justify-between ">
      
       <button className="text-xl font-bold text-blue-600 hover:text-blue-800">
@@ -29,9 +29,8 @@ export default function Navbar() {
       </button>
     </nav>
 
-    <p> </p>
-
-    </body>
+   
+   
   );
 }
 
