@@ -1,11 +1,8 @@
 import React from 'react'
-import Navbar from './components/Navbar'
 
-function App() {
+const Days = () => {
   return (
-    <div>
-      <Navbar/>
-       <div className='w-full h-screen  '>
+   <div className='w-full h-screen  '>
         <button className='bg-gray-200 text-black text-2xl shadow-lg rounded- p-4 mb-7 mt-15 w-50 ml-10 '>August 2025</button>
         <div className=' flex flex-col  '>
         {Array(7).fill(null).map((_,i)=>(
@@ -15,11 +12,7 @@ function App() {
         ))}
          </div>
         </div>
-
-       
-    </div>
-
   )
 }
 
-export default App
+export default Days

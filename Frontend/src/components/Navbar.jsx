@@ -14,11 +14,11 @@ export default function Navbar() {
         <button className=" bg-white text-blue-600 px-4 py-2 rounded-lg">
           Task
         </button>
-        <button className="bg-white text-blue-600 px-4 py-2 rounded-lg ">
+        <button className="bg-white text-blue-600 px-4 py-2 rounded-lg">
           Update 
         </button>
 
-        <button className="bg-white text-blue-600 px-4 py-2 rounded-lg  ">
+        <button className="bg-white text-blue-600 px-4 py-2 rounded-lg ">
          Progress
         </button>
       </div>
