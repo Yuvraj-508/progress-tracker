@@ -14,23 +14,7 @@ export const AppProvider = ({ children }) => {
  const now = new Date();
   const monthYear = now.toLocaleString("default", { month: "long", year: "numeric" });
 
-  const userStatus = async () => {
-    try {
-      const { data } = await axios.get('/user/is-auth');
-      if (data.success) {
-        setUser(data.user);
-      } else {
-        setUser(null);
-      }
-    } catch (error) {
-      console.error(error);
-      setUser(null); 
-    }
-   }
 
-   useEffect(()=>{
-   userStatus();
-   },[])
 
   const value = {
     user,

@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useEffect} from 'react'
 import Navbar from './components/Navbar'
 import { Route, Routes } from 'react-router-dom'
 import Form from './components/Form'
@@ -11,8 +11,26 @@ import List from './components/List'
 import Upload from './components/Upload'
 
 function App() {
-  const {user}=useAppContext();
+  const {user,axios,setUser}=useAppContext();
+    const userStatus = async () => {
+      try {
+        const { data } = await axios.get('/user/is-auth');
+        if (data.success) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error(error);
+        setUser(null); 
+      }
+     }
+  
+     useEffect(()=>{
+     userStatus();
+     },[])
   return (
+ 
 
   
     <div className='min-h-screen'>
