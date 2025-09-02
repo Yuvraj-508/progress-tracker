@@ -69,9 +69,9 @@ if (data.success) {
 
   if (!dayData) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">
+      <div className="w-full h-screen flex flex-col gap-2 items-center justify-center">
         <p className="text-gray-500">No data available...</p>
-        <button className="bg-blue-600 p-4 rounded-xl text-lg" 
+        <button className="bg-blue-600 p-2 rounded-xl text-sm text-white" 
         onClick={()=>{
           navigate('/upload')
         }}>Click Here To Upload</button>
