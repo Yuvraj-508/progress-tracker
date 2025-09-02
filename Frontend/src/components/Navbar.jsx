@@ -2,7 +2,25 @@ import React from "react"
 import { NavLink } from "react-router-dom"
 import { useAppContext } from "../Context/Context";
 export default function Navbar() {
-  const {user,setUser} = useAppContext();
+  const {user,setUser,axios,toast} = useAppContext();
+  const handleLogout=async()=>{
+    try {
+      const {data}=await axios.get('/user/logout');
+      if(data?.success){
+      setUser(null);
+      toast.success(data.message||"Logged out successfully");
+      }
+     else {
+      toast.error(data.message || "try again later ");
+    }
+  } catch (err) {
+    console.error(err);
+ 
+    // ✅ handle backend errors properly
+    const backendMessage = err.response?.data?.message;
+    toast.error(backendMessage || "Something went wrong, please try again");
+  }
+};
   return (
     
     <nav className="w-full bg-white shadow-md px-6 py-3 flex items-center justify-between ">
@@ -35,9 +53,7 @@ export default function Navbar() {
       </NavLink>
      ):
      (
-      <NavLink onClick={()=>{
-        setUser(null);
-      }} className="border bg-blue-600 text-white px-4 py-2 cursor-pointer rounded-lg ">
+      <NavLink onClick={handleLogout} className="border bg-blue-600 text-white px-4 py-2 cursor-pointer rounded-lg ">
        Logout
       </NavLink>
      )}

@@ -1,10 +1,13 @@
 import express from 'express';
 import 'dotenv/config';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import connectDB from './Config/Db.js';
 import userRouter from './Routes/userRoute.js';
+import taskRouter from './Routes/taskRoute.js';
 
 const app = express();
+app.use(cookieParser());
 const PORT = process.env.PORT || 3000;
 await connectDB();
 
@@ -21,6 +24,7 @@ app.get('/', (req, res) => {
 app.use(express.json());
 
 app.use('/user',userRouter);
+app.use('/api/user',taskRouter);
 
 
 app.listen(PORT, () => {

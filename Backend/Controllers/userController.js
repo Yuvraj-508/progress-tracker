@@ -1,5 +1,6 @@
 import User from "../Models/User.js";
 import bcrypt from "bcrypt";
+import Jwt from "jsonwebtoken";
 export const Register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -29,6 +30,17 @@ export const Register = async (req, res) => {
       name,
       email,
       password: hashPassword,
+    });
+     
+    const token = Jwt.sign({id:user._id},process.env.JWT_SECRET,{
+      expiresIn:"7d"
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(201).json({
@@ -74,6 +86,16 @@ export const Login = async (req, res) => {
         message: "Invalid credentials",
       });
     }
+const token = Jwt.sign({id:user._id},process.env.JWT_SECRET,{
+      expiresIn:"7d"
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     return res.status(200).json({
       success: true,
@@ -91,3 +113,32 @@ export const Login = async (req, res) => {
     });
   }
 };
+
+export const Logout = async (req,res)=>{
+    try {
+        res.clearCookie('token',{
+          httpOnly: true,
+          secure: true, // ✅ required for HTTPS
+          sameSite: 'None', // ✅ allow cross-origin cookies
+       
+        });
+        return res.status(200).json({success:true,message:"Logged out successfully"});
+    } catch (error) {
+        console.log(err.message);
+        res.status(500).json({success:false,message:err.message});
+    }
+}
+
+export const isAuth = async (req, res) => {
+  try {
+    const {id}= req.user;
+    const user = await User.findById(id).select("-password");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    return res.status(200).json({ success: true, user });
+    } catch (err) {
+    console.log(err.message);
+    res.status(500).json({ success: false, message: err.message });
+    }
+}

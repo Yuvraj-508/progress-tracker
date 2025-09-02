@@ -1,7 +1,8 @@
 import axios from "axios";
 import { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import toast from "react-hot-toast";
+import { useEffect } from "react";
 axios.defaults.withCredentials = true; // Send cookies with requests
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
@@ -10,12 +11,34 @@ export const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+ const now = new Date();
+  const monthYear = now.toLocaleString("default", { month: "long", year: "numeric" });
+
+  const userStatus = async () => {
+    try {
+      const { data } = await axios.get('/user/is-auth');
+      if (data.success) {
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error(error);
+      setUser(null); 
+    }
+   }
+
+   useEffect(()=>{
+   userStatus();
+   },[])
 
   const value = {
     user,
     setUser,
     navigate,
-    axios, // available if you want axios directly
+    axios,
+    toast,
+    monthYear // available if you want axios directly
   };
 
   return (

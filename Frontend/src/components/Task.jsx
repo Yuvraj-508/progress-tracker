@@ -1,11 +1,24 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react';
 import { useAppContext } from '../Context/Context';
 const Task = () => {
-  const {navigate}= useAppContext();
+  const {navigate,user,toast,monthYear}= useAppContext();
+
+  useEffect(()=>{
+   if(!user) {navigate('/login')
+    toast.error("Please login to access tasks");
+   };
+   
+  },[user,navigate]);
+
+   if (!user) return null; 
+
+    
+
   return (
+
     <div className='w-full h-screen  '>
-        <button className='bg-gray-200 text-black text-2xl shadow-lg rounded- p-4 mb-5 mt-15 w-50 ml-10'>August 2025</button>
+        <button className='bg-gray-200 text-black text-2xl shadow-lg rounded- p-4 mb-5 mt-15  ml-10'>{monthYear}</button>
         <div className=' flex flex-col  '>
         {Array(4).fill(null).map((_,i)=>(
              <button key={i} 
