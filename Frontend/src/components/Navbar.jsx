@@ -2,13 +2,14 @@ import React from "react"
 import { NavLink } from "react-router-dom"
 import { useAppContext } from "../Context/Context";
 export default function Navbar() {
-  const {user,setUser,axios,toast} = useAppContext();
+  const {user,setUser,axios,toast,navigate} = useAppContext();
   const handleLogout=async()=>{
     try {
       const {data}=await axios.get('/user/logout');
       if(data?.success){
       setUser(null);
       toast.success(data.message||"Logged out successfully");
+      navigate('/');
       }
      else {
       toast.error(data.message || "try again later ");

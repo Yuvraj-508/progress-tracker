@@ -123,7 +123,7 @@ console.log(sections);
       <div
         key={i}
         className="flex justify-between items-center border-b last:border-b-0"
-      >
+      >ok
         <span
           className={`flex items-center gap-2 ${
             section.locked ? "line-through text-gray-400" : "text-gray-800"
