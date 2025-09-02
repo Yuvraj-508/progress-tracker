@@ -1,17 +1,21 @@
 import { ChevronDown, ChevronUp, Check } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { useAppContext } from "../Context/Context";
 
 function List() {
+  const {navigate}=useAppContext();
   const { week, day } = useParams();
   const [openIndex, setOpenIndex] = useState(null);
   const [dayData, setDayData] = useState(null);
-
+  const [loading, setLoading] = useState(true);
   // Fetch day data on load
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
+       
         const { data } = await axios.get(`/api/user/taskplan/${week}/${day}`);
         if (data?.success) {
           setDayData(data.dayData);
@@ -21,6 +25,8 @@ function List() {
       } catch (err) {
         console.error(err);
         setDayData(null);
+      }finally {
+        setLoading(false); // hide loader
       }
     };
     fetchData();
@@ -52,15 +58,26 @@ if (data.success) {
       console.error(err);
     }
   };
-
-  if (!dayData) {
+   if (loading) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading or no data available...</p>
+        {/* Simple animated loader */}
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
   }
 
+  if (!dayData) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <p className="text-gray-500">No data available...</p>
+        <button className="bg-blue-600 p-4 rounded-xl text-lg" 
+        onClick={()=>{
+          navigate('/upload')
+        }}>Click Here To Upload</button>
+      </div>
+    );
+  }
   // Build sections from backend data
   // Convert Map objects into plain JS objects
 // Ensure fallback to empty object
@@ -123,7 +140,7 @@ console.log(sections);
       <div
         key={i}
         className="flex justify-between items-center border-b last:border-b-0"
-      >ok
+      >
         <span
           className={`flex items-center gap-2 ${
             section.locked ? "line-through text-gray-400" : "text-gray-800"
