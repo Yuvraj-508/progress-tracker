@@ -79,57 +79,76 @@ console.log(sections);
 
 
   return (
-    <div className="w-full flex flex-col gap-5 h-screen px-[6%]">
-      <button className="w-fit bg-gray-200 text-black text-sm mb-2 p-1 mt-15">
-        Week {week}
-      </button>
-      <button className="w-fit bg-gray-200 text-black text-2xl shadow-lg rounded p-4">
-        Tasks for Day {day}
+   <div className="w-full flex flex-col items-center gap-5 h-full px-6 py-8 bg-gray-50">
+  {/* Week and Day */}
+  <div className="flex mb-5 flex-col gap-5 items-center ">
+    <button className="bg-gray-200 text-black text-sm px-4 py-1 rounded-full shadow">
+      Week {week}
+    </button>
+    <button className="bg-gray-200 text-black text-2xl shadow-md rounded-xl px-6 py-3">
+      Tasks for Day {day}
+    </button>
+  </div>
+
+  {/* Sections */}
+  {sections.map((section, index) => (
+    <div
+      key={index}
+      className="w-[45%] bg-white rounded-2xl shadow-md   overflow-hidden"
+    >
+      {/* Section Header */}
+      <button
+        className="flex justify-between items-center p-4 bg-gray-200 hover:bg-gray-300 transition-all font-semibold cursor-pointer text-lg w-full"
+        onClick={() => toggleSection(index)}
+      >
+        <span>{section.title}</span>
+        <span>
+          {openIndex === index ? (
+            <ChevronUp className="w-5 h-5" />
+          ) : (
+            <ChevronDown className="w-5 h-5" />
+          )}
+        </span>
       </button>
 
-      {sections.map((section, index) => (
-        <div key={index}>
-          {/* Section Header */}
-          <button
-            className="flex justify-between text-2xl cursor-pointer items-center p-3 bg-gray-200 w-[50%] mt-8"
-            onClick={() => toggleSection(index)}
-          >
-            {section.title}
-            {openIndex === index ? <ChevronUp /> : <ChevronDown />}
-          </button>
+      {/* Section Content */}
 
-          {/* Section Content */}
-          <div
-            className={
-              openIndex === index
-                ? "flex flex-col divide-y divide-gray-300 p-3 w-[50%] bg-gray-100 rounded-md"
-                : "hidden"
-            }
-          >
-            {section.topics.map((topic, i) => (
-              <p key={i} className="flex justify-between items-center py-2">
-                <span
-                  className={`flex items-center gap-2 ${
-                    section.locked ? "line-through text-gray-500" : ""
-                  }`}
-                >
-                  <span>{i + 1}.</span>
-                  <span className="block break-all">{topic}</span>
-                </span>
-                <button
-                  onClick={() => toggleLock(section.title, section.locked)}
-                  className={`cursor-pointer w-7 h-7 ml-4 flex items-center justify-center rounded-full text-center p-1 ${
-                    section.locked ? "bg-gray-400" : "bg-green-600"
-                  }`}
-                >
-                  <Check stroke="white" />
-                </button>
-              </p>
-            ))}
-          </div>
-        </div>
-      ))}
+<div
+  className={`overflow-hidden transition-all  duration-300 ${
+    openIndex === index ? "max-h-[1000px]" : "max-h-0"
+  }`}
+>
+  <div className="p-3 flex flex-col gap-2"> {/* padding wrapper */}
+    {section.topics.map((topic, i) => (
+      <div
+        key={i}
+        className="flex justify-between items-center border-b last:border-b-0"
+      >
+        <span
+          className={`flex items-center gap-2 ${
+            section.locked ? "line-through text-gray-400" : "text-gray-800"
+          }`}
+        >
+          <span className="font-semibold">{i + 1}.</span>
+          <span className="break-words">{topic}</span>
+        </span>
+        <button
+          onClick={() => toggleLock(section.title, section.locked)}
+          className={`w-8 h-8 flex items-center justify-center rounded-full p-1 transition-colors ${
+            section.locked ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
+          }`}
+        >
+          <Check stroke="white" className="w-4 h-4" />
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
+
     </div>
+  ))}
+</div>
+
   );
 }
 

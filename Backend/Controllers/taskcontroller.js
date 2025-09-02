@@ -54,6 +54,7 @@ export const getTaskPlanByWeekDay = async (req, res) => {
   try {
     const { week, day } = req.params;
     const { id: userId } = req.user;
+   
 
     // Find task plan for that user & week
     const taskPlan = await Task.findOne({ userId, week });
@@ -79,24 +80,29 @@ export const dataLocked = async (req, res) => {
   try {
     const { week, day } = req.params;
     const { section } = req.body;
+    const { id: userId } = req.user;
 
-    // Update
-    await Task.updateOne(
-      { week, "days.day": day },
-      { $set: { [`days.$.locked.${section}`]: true } }
-    );
+    const taskPlan = await Task.findOne({ userId, week });
+    if (!taskPlan) return res.status(404).json({ success: false, message: "Task plan not found" });
 
-    // Fetch updated plan
-    const updatedPlan = await Task.findOne({ week });
-    const updatedDay = updatedPlan.days.find(d => d.day === Number(day));
+    const dayData = taskPlan.days.find(d => d.day === Number(day));
+    if (!dayData) return res.status(404).json({ success: false, message: "Day not found" });
 
+    // ✅ Use Map.set() to update dynamic keys
+    if (!dayData.locked) dayData.locked = new Map();
+    dayData.locked.set(section, true);
+
+    await taskPlan.save();
+console.log("Locked section:", dayData);
     return res.status(200).json({
       success: true,
       message: `${section} locked`,
-      dayData: updatedDay,
+      dayData,
     });
   } catch (err) {
     console.error("dataLocked error:", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
