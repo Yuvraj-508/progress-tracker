@@ -13,8 +13,6 @@ const Task = () => {
 
    if (!user) return null; 
 
-    
-
   return (
 
     <div className='w-full h-screen  '>

@@ -39,11 +39,11 @@ function App() {
       <div>
         <Routes>
           <Route path='/' element={<Home/>} />
-          <Route path='/login' element={<Form />} />
-           <Route path='/task' element={<Task/>} />
+          <Route path='/login' element={user?<Home/>:<Form />} />
+           <Route path='/task' element={user?<Task/>:<Form/>} />
            <Route path='/task/:week' element={<Days/>} />
             <Route path='/task/:week/:day' element={<List/>} />
-            <Route path='/upload' element={ <Upload/> } />
+            <Route path='/upload' element={ user?<Upload/>:<Form/> } />
         </Routes>
       </div>
 
