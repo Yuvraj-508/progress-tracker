@@ -14,6 +14,7 @@ function Upload() {
     { section: "Aptitude", value: "" },
     { section: "SoftSkills", value: "" },
   ]);
+  const [loading, setLoading] = useState(false);
 
   // handle input change
   const handleInputChange = (index, value) => {
@@ -34,6 +35,7 @@ function Upload() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     if (!selectedWeek || !selectedDay) {
       alert("Please select both week and day");
       return;
@@ -68,6 +70,8 @@ function Upload() {
       console.error(err);
       const backendMessage = err.response?.data?.message;
       toast.error(backendMessage || "Something went wrong, please try again");
+    }finally{
+      setLoading(false);
     }
   };
 

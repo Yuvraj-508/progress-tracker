@@ -5,16 +5,16 @@ import axios from "axios";
 import { useAppContext } from "../Context/Context";
 
 function List() {
-  const {navigate,loading,setLoading}=useAppContext();
+  const {navigate}=useAppContext();
   const { week, day } = useParams();
   const [openIndex, setOpenIndex] = useState(null);
   const [dayData, setDayData] = useState(null);
+    const [loading, setLoading] = useState(false); 
   // Fetch day data on load
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-       
         const { data } = await axios.get(`/api/user/taskplan/${week}/${day}`);
         if (data?.success) {
           setDayData(data.dayData);
@@ -57,6 +57,7 @@ if (data.success) {
       console.error(err);
     }
   };
+
    if (loading) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
