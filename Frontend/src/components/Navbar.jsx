@@ -2,7 +2,7 @@ import React from "react"
 import { NavLink } from "react-router-dom"
 import { useAppContext } from "../Context/Context";
 export default function Navbar() {
-  const {user,setUser,axios,toast,navigate,handleLogout} = useAppContext();
+  const {user,handleLogout} = useAppContext();
 
   return (
     

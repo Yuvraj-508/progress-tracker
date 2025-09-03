@@ -94,6 +94,7 @@ const token = Jwt.sign({id:user._id},process.env.JWT_SECRET,{
       httpOnly: true,
       secure: true,
       sameSite: "None",
+       path: "/",    
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
