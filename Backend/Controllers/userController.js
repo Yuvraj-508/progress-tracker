@@ -115,20 +115,28 @@ const token = Jwt.sign({id:user._id},process.env.JWT_SECRET,{
   }
 };
 
-export const Logout = async (req,res)=>{
-    try {
-        res.clearCookie('token',{
-          httpOnly: true,
-          secure: true, // ✅ required for HTTPS
-          sameSite: 'None', // ✅ allow cross-origin cookies
-          path: "/",  
-        });
-        return res.status(200).json({success:true,message:"Logged out successfully"});
-    } catch (error) {
-        console.log(err.message);
-        res.status(500).json({success:false,message:err.message});
-    }
-}
+export const Logout = async (req, res) => {
+  try {
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true, // or process.env.NODE_ENV === "production"
+      sameSite: "None",
+      path: "/", // 🔑 important, must match
+    };
+
+    res.clearCookie("token", cookieOptions);
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Logged out successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error, please try again later" });
+  }
+};
+
 
 export const isAuth = async (req, res) => {
   try {
