@@ -8,7 +8,7 @@ export default function Navbar() {
       const {data}=await axios.get('/user/logout');
       if(data?.success){
       setUser(null);
-      toast.success(data.message||"Logged out successfully");
+      toast.success(data.message);
       navigate('/');
       }
      else {
