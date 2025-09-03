@@ -8,9 +8,8 @@ import taskRouter from './Routes/taskRoute.js';
 
 const app = express();
 app.use(cookieParser());
-const PORT = process.env.PORT || 3000;
 await connectDB();
-
+const PORT = process.env.PORT || 3000;
 app.use(cors({
     origin: ['http://localhost:5173','https://progress-tracker-dun.vercel.app'],
     credentials: true
