@@ -42,7 +42,7 @@ export const AppProvider = ({ children }) => {
   // ✅ Logout handler
   const handleLogout = async () => {
     try {
-      const { data } = await axios.get("/user/logout", {
+      const { data } = await axios.post("/user/logout", {
         withCredentials: true,
       });
       if (data?.success) {
