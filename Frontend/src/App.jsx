@@ -11,24 +11,8 @@ import List from './Pages/List'
 import Upload from './Pages/Upload'
 
 function App() {
-  const {user,axios,setUser}=useAppContext();
-    const userStatus = async () => {
-      try {
-        const { data } = await axios.get('/user/is-auth');
-        if (data.success) {
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error(error);
-        setUser(null); 
-      }
-     }
-  
-     useEffect(()=>{
-     userStatus();
-     },[])
+  const {user,axios,setUser,setLoading}=useAppContext();
+    
   return (
  
 

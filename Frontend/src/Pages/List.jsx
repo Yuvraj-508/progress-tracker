@@ -5,11 +5,10 @@ import axios from "axios";
 import { useAppContext } from "../Context/Context";
 
 function List() {
-  const {navigate}=useAppContext();
+  const {navigate,loading,setLoading}=useAppContext();
   const { week, day } = useParams();
   const [openIndex, setOpenIndex] = useState(null);
   const [dayData, setDayData] = useState(null);
-  const [loading, setLoading] = useState(true);
   // Fetch day data on load
   useEffect(() => {
     const fetchData = async () => {
