@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { useAppContext } from "../Context/Context";
+import ProgressBar from "../components/ProgressBar";
 
 function List() {
 const { navigate } = useAppContext();
@@ -109,6 +110,8 @@ console.log(sections);
   return (
    <div className="w-full flex flex-col items-center gap-5 h-full px-6 py-8 bg-gray-50">
   {/* Week and Day */}
+  <ProgressBar sections={sections} />
+  
   <div className="flex mb-5 flex-col gap-5 items-center ">
     <button className="bg-gray-200 text-black text-sm px-4 py-1 rounded-full shadow">
       Week {week}
