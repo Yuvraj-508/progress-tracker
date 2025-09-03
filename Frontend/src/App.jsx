@@ -1,14 +1,14 @@
 import React,{useEffect} from 'react'
 import Navbar from './components/Navbar'
 import { Route, Routes } from 'react-router-dom'
-import Form from './components/Form'
-import Home from './components/Home'
+import Form from './Pages/Form'
+import Home from './Pages/Home'
 import { Toaster } from 'react-hot-toast'
-import Task from './components/Task'
-import Days from './components/Days'
+import Task from './Pages/Task'
+import Days from './Pages/Days'
 import { useAppContext } from './Context/Context'
-import List from './components/List'
-import Upload from './components/Upload'
+import List from './Pages/List'
+import Upload from './Pages/Upload'
 
 function App() {
   const {user,axios,setUser}=useAppContext();
