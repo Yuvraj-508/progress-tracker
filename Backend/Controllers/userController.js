@@ -120,7 +120,7 @@ export const Logout = async (req,res)=>{
           httpOnly: true,
           secure: true, // ✅ required for HTTPS
           sameSite: 'None', // ✅ allow cross-origin cookies
-       
+          path: "/",  
         });
         return res.status(200).json({success:true,message:"Logged out successfully"});
     } catch (error) {
