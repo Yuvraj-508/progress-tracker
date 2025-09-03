@@ -148,12 +148,23 @@ function Upload() {
           <Plus size={18} className="inline" /> Add Topic
         </button>
 
-        <button
-          className="bg-blue-400 text-white rounded-2xl p-3 cursor-pointer"
-          type="submit"
-        >
-          Submit
-        </button>
+       <button
+  type="submit"
+  disabled={loading} // disable button during loading
+  className={`bg-blue-400 text-white rounded-2xl p-3 cursor-pointer flex items-center justify-center gap-2 ${
+    loading ? "opacity-70 cursor-not-allowed" : ""
+  }`}
+>
+  {loading ? (
+    <>
+      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+      <span>Submitting...</span>
+    </>
+  ) : (
+    "Submit"
+  )}
+</button>
+
       </form>
     </div>
   );
