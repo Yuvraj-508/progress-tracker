@@ -3,31 +3,32 @@ import Task from "../Models/TaskPlan.js";
 // POST - create a new week's plan
 export const taskPlan = async (req, res) => {
   try {
-    const { monthYear, week, days } = req.body;
+    const { monthYear, week, day,topics } = req.body;
     const { id: userId } = req.user;
 
     console.log(req.body);
 
     let taskPlan = await Task.findOne({ userId, monthYear, week });
-
+    console.log("Existing Task Plan:", taskPlan);
     if (taskPlan) {
       // If it exists, add/update the new days
-      days.forEach((newDay) => {
-        const existingDayIndex = taskPlan.days.findIndex(d => d.day === newDay.day);
+      const existingDayIndex = taskPlan.days.findIndex(d => d.day === day);
+
+    console.log("Existing Day Index:", existingDayIndex);
         if (existingDayIndex !== -1) {
           // Update existing day's topics properly
-          Object.keys(newDay.topics).forEach(key => {
-            taskPlan.days[existingDayIndex].topics[key] = newDay.topics[key];
-          });
+          Object.keys(topics).forEach(key => {
+          taskPlan.days[existingDayIndex].topics.set(key, topics[key]); // Map support
+        });
         } else {
           // Add new day
-          taskPlan.days.push(newDay);
+       taskPlan.days.push({ day, topics });
         }
-      });
+
 
       // Mark the 'days' field as modified so Mongoose updates it
      
-
+    taskPlan.markModified("days");
       await taskPlan.save();
       return res.status(200).json({ success: true, message: "Task plan updated", taskPlan });
     } else {
@@ -35,7 +36,7 @@ export const taskPlan = async (req, res) => {
       taskPlan = new Task({
         monthYear,
         week,
-        days,
+  days: [{ day, topics }],
         userId
       });
 

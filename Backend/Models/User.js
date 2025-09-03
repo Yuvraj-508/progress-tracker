@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    }
+    },
+      isChallengeParticipant: { type: Boolean, default: false },
 },{timestamps:true,minimize:false});
 
 const User = mongoose.models.user || mongoose.model("User", userSchema);

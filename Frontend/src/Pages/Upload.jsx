@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import axios from "axios";
 import { useAppContext } from "../Context/Context";
 import toast from "react-hot-toast";
-import { Plus, Trash } from "lucide-react"; // optional icons
+import { Plus, Trash } from "lucide-react";
 
 function Upload() {
-  const { monthYear } = useAppContext();
+  const { monthYear,totalWeeks, getDaysForWeek  } = useAppContext(); // e.g. "September 2025"
   const [selectedWeek, setSelectedWeek] = useState("");
   const [selectedDay, setSelectedDay] = useState("");
   const [topics, setTopics] = useState([
@@ -16,6 +16,7 @@ function Upload() {
   ]);
   const [loading, setLoading] = useState(false);
 
+
   // handle input change
   const handleInputChange = (index, value) => {
     const updated = [...topics];
@@ -23,12 +24,10 @@ function Upload() {
     setTopics(updated);
   };
 
-  // add new input
   const addInput = () => {
     setTopics([...topics, { section: `Custom-${topics.length + 1}`, value: "" }]);
   };
 
-  // remove input
   const removeInput = (index) => {
     setTopics(topics.filter((_, i) => i !== index));
   };
@@ -36,12 +35,13 @@ function Upload() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     if (!selectedWeek || !selectedDay) {
       alert("Please select both week and day");
+      setLoading(false);
       return;
     }
 
-    // Convert topics array into object (backend expects object)
     const topicObj = topics.reduce((acc, curr) => {
       acc[curr.section] = curr.value;
       return acc;
@@ -51,7 +51,9 @@ function Upload() {
       const payload = {
         monthYear,
         week: Number(selectedWeek),
-        days: [{ day: Number(selectedDay), topics: topicObj }],
+        // note: saving relative day number inside week
+        day: Number(selectedDay),
+        topics: topicObj,
       };
 
       const { data } = await axios.post("/api/user/taskplan", payload);
@@ -70,7 +72,7 @@ function Upload() {
       console.error(err);
       const backendMessage = err.response?.data?.message;
       toast.error(backendMessage || "Something went wrong, please try again");
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -88,10 +90,13 @@ function Upload() {
           <select
             className="ml-3 p-2 border rounded bg-white shadow"
             value={selectedWeek}
-            onChange={(e) => setSelectedWeek(e.target.value)}
+            onChange={(e) => {
+              setSelectedWeek(e.target.value);
+              setSelectedDay(""); // reset when week changes
+            }}
           >
             <option value="">--Choose Week--</option>
-            {[1, 2, 3, 4, 5].map((week) => (
+            {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
               <option key={week} value={week}>
                 Week {week}
               </option>
@@ -100,21 +105,23 @@ function Upload() {
         </label>
 
         {/* Day select */}
-        <label className="text-lg font-medium">
-          Select Day:
-          <select
-            className="ml-3 p-2 border rounded bg-white shadow"
-            value={selectedDay}
-            onChange={(e) => setSelectedDay(e.target.value)}
-          >
-            <option value="">--Choose Day--</option>
-            {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-              <option key={day} value={day}>
-                Day {day}
-              </option>
-            ))}
-          </select>
-        </label>
+        {selectedWeek && (
+          <label className="text-lg font-medium">
+            Select Day:
+            <select
+              className="ml-3 p-2 border rounded bg-white shadow"
+              value={selectedDay}
+              onChange={(e) => setSelectedDay(e.target.value)}
+            >
+              <option value="">--Choose Day--</option>
+              {getDaysForWeek(selectedWeek).map((day) => (
+                <option key={day} value={day}>
+                  Day {day}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         {/* Dynamic topic inputs */}
         {topics.map((topic, index) => (
@@ -126,7 +133,6 @@ function Upload() {
               value={topic.value}
               onChange={(e) => handleInputChange(index, e.target.value)}
             />
-            {/* remove button */}
             {topics.length > 1 && (
               <button
                 type="button"
@@ -139,7 +145,6 @@ function Upload() {
           </div>
         ))}
 
-        {/* add new input */}
         <button
           type="button"
           className="bg-green-500 text-white p-2 rounded w-fit"
@@ -148,23 +153,22 @@ function Upload() {
           <Plus size={18} className="inline" /> Add Topic
         </button>
 
-       <button
-  type="submit"
-  disabled={loading} // disable button during loading
-  className={`bg-blue-400 text-white rounded-2xl p-3 cursor-pointer flex items-center justify-center gap-2 ${
-    loading ? "opacity-70 cursor-not-allowed" : ""
-  }`}
->
-  {loading ? (
-    <>
-      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-      <span>Submitting...</span>
-    </>
-  ) : (
-    "Submit"
-  )}
-</button>
-
+        <button
+          type="submit"
+          disabled={loading}
+          className={`bg-blue-400 text-white rounded-2xl p-3 cursor-pointer flex items-center justify-center gap-2 ${
+            loading ? "opacity-70 cursor-not-allowed" : ""
+          }`}
+        >
+          {loading ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+              <span>Submitting...</span>
+            </>
+          ) : (
+            "Submit"
+          )}
+        </button>
       </form>
     </div>
   );

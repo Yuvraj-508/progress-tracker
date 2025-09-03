@@ -5,12 +5,15 @@ import axios from "axios";
 import { useAppContext } from "../Context/Context";
 
 function List() {
-  const {navigate}=useAppContext();
+const { navigate } = useAppContext();
   const { week, day } = useParams();
   const [openIndex, setOpenIndex] = useState(null);
   const [dayData, setDayData] = useState(null);
     const [loading, setLoading] = useState(false); 
-  // Fetch day data on load
+  const [lockLoading, setLockLoading] = useState({}); 
+// { Dsa: false, Web: false, ... }
+
+  console.log(openIndex);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -37,26 +40,34 @@ function List() {
   };
 
   // Lock a section (irreversible)
-  const toggleLock = async (sectionTitle, isLocked) => {
-    if (isLocked) return; // already locked
+const toggleLock = async (sectionTitle, isLocked) => {
+  if (isLocked) return; // already locked
 
-    const confirmLock = window.confirm(
-      "Are you sure you want to mark this as done? This cannot be undone."
+  const confirmLock = window.confirm(
+    "Are you sure you want to mark this as done? This cannot be undone."
+  );
+  if (!confirmLock) return;
+
+  try {
+    // set loader for this section
+    setLockLoading(prev => ({ ...prev, [sectionTitle]: true }));
+
+    const { data } = await axios.put(
+      `/api/user/taskplan/${week}/${day}/lock`,
+      { section: sectionTitle }
     );
-    if (!confirmLock) return;
 
-    try {
-     const { data } = await axios.put(
-  `/api/user/taskplan/${week}/${day}/lock`,
-  { section: sectionTitle }
-);
-if (data.success) {
-  setDayData(data.dayData); // now contains fresh lock state
-}
-    } catch (err) {
-      console.error(err);
+    if (data.success) {
+      setDayData(data.dayData); // update fresh lock state
     }
-  };
+  } catch (err) {
+    console.error(err);
+  } finally {
+    // hide loader for this section
+    setLockLoading(prev => ({ ...prev, [sectionTitle]: false }));
+  }
+};
+
 
    if (loading) {
     return (
@@ -108,6 +119,7 @@ console.log(sections);
   </div>
 
   {/* Sections */}
+
   {sections.map((section, index) => (
     <div
       key={index}
@@ -149,14 +161,19 @@ console.log(sections);
           <span className="font-semibold">{i + 1}.</span>
           <span className="break-words">{topic}</span>
         </span>
-        <button
-          onClick={() => toggleLock(section.title, section.locked)}
-          className={`w-8 h-8 flex items-center justify-center rounded-full p-1 transition-colors ${
-            section.locked ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
-          }`}
-        >
-          <Check stroke="white" className="w-4 h-4" />
-        </button>
+       <button
+  onClick={() => toggleLock(section.title, section.locked)}
+  className={`w-8 h-8 flex items-center justify-center cursor-pointer rounded-full p-1 transition-colors ${
+    section.locked ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
+  }`}
+>
+  {lockLoading[section.title] ? (
+    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+  ) : (
+    <Check stroke="white" className="w-4 h-4" />
+  )}
+</button>
+
       </div>
     ))}
   </div>
@@ -164,7 +181,8 @@ console.log(sections);
 
     </div>
   ))}
-</div>
+  </div>
+
 
   );
 }

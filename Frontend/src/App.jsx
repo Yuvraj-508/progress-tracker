@@ -12,11 +12,10 @@ import Upload from './Pages/Upload'
 
 function App() {
   const {user,axios,setUser,setLoading}=useAppContext();
-    
-  return (
- 
 
-  
+
+  return (
+
     <div className='min-h-screen'>
       <Navbar />
       <Toaster/>

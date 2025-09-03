@@ -1,6 +1,7 @@
 import React from "react"
 import { NavLink } from "react-router-dom"
 import { useAppContext } from "../Context/Context";
+import { assets } from "../assets/assets";
 export default function Navbar() {
   const {user,handleLogout} = useAppContext();
 
@@ -31,15 +32,31 @@ export default function Navbar() {
       </div>
 
      {!user ? (
-    <NavLink to='/login' className="border bg-blue-600 text-white px-4 py-2 cursor-pointer rounded-lg ">
-       Login
-      </NavLink>
-     ):
-     (
-      <NavLink onClick={handleLogout} className="border bg-blue-600 text-white px-4 py-2 cursor-pointer rounded-lg ">
-       Logout
-      </NavLink>
-     )}
+          <NavLink
+            to='/login'
+            className="cursor-pointer px-8 py-2 bg-blue-600 hover:bg-blue-400 transition text-white rounded-full"
+          >
+            Login
+          </NavLink>
+        ) : (
+          <div className="relative group">
+            <img src={assets.profile_icon} className="w-10" alt="" />
+            <ul className="hidden group-hover:block absolute top-10 right-0 bg-white shadow border border-gray-200 py-2.5 w-30 rounded-md text-sm z-40">
+              <li
+                className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
+              >
+               {user.name.charAt(0).toUpperCase() + user.name.slice(1)}
+
+              </li>
+              <li
+                onClick={handleLogout}
+                className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
+              >
+                Logout
+              </li>
+            </ul>
+          </div>
+        )}
      
 
       

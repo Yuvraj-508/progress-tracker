@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect,useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -15,7 +15,36 @@ export const AppProvider = ({ children }) => {
 
   const now = new Date();
   const monthYear = now.toLocaleString("default", { month: "long", year: "numeric" });
+   const { totalDays, totalWeeks } = useMemo(() => {
+    if (!monthYear) return { totalDays: 0, totalWeeks: 0 };
 
+    const [monthName, year] = monthYear.split(" ");
+    const monthIndex = new Date(`${monthName} 1, ${year}`).getMonth();
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+    const weeks = Math.ceil(daysInMonth / 7);
+
+    return { totalDays: daysInMonth, totalWeeks: weeks };
+  }, [monthYear]);
+
+    // 🔹 Function: get relative days for week
+  const getDaysForWeek = (weekNum) => {
+    if (!weekNum) return [];
+
+    const startDay = (weekNum - 1) * 7 + 1;
+    const endDay = Math.min(startDay + 6, totalDays);
+
+    // relative days (1–7 inside week)
+    return Array.from({ length: endDay - startDay + 1 }, (_, i) => i + 1);
+  };
+
+  const getAbsoluteDaysForWeek = (weekNum) => {
+    if (!weekNum) return [];
+
+    const startDay = (weekNum - 1) * 7 + 1;
+    const endDay = Math.min(startDay + 6, totalDays);
+
+    return Array.from({ length: endDay - startDay + 1 }, (_, i) => startDay + i);
+  };
   // ✅ Check login status
   const userStatus = async () => {
     setLoading(true);
@@ -58,7 +87,11 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  if (loading) {
+  
+
+
+
+if (loading) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
         {/* Loader */}
@@ -77,7 +110,11 @@ export const AppProvider = ({ children }) => {
     loading,
     setLoading,
     userStatus,
-    handleLogout, // ✅ export logout so you can use it anywhere
+    handleLogout,
+        totalDays,
+    totalWeeks,
+    getDaysForWeek,        // relative 1–7 inside week
+    getAbsoluteDaysForWeek // ✅ export logout so you can use it anywhere
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
