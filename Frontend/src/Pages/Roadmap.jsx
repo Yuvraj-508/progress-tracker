@@ -37,7 +37,38 @@ if (loading) {
     );
   }
 
-  if (roadmaps.length === 0) {
+  console.log(roadmaps);
+  console.log(days);
+
+  // Fetch roadmap days for selected week
+const fetchWeekData = async (roadmapId, week) => {
+  try {
+    setLoading(true);
+    const { data } = await axios.get(`/api/user/roadmap/${roadmapId}?week=${week}`);
+    
+    if (data.success) {
+      if (!data.days || data.days.length === 0) {
+        // No days data found for this week
+        setDays([]); // reset
+        toast.error(`No data available for Week ${week}`);
+      } else {
+        setDays(data.days); // normal data
+      }
+    } else {
+      setDays([]);
+      toast.error(data.message || `No data available for Week ${week}`);
+    }
+  } catch (err) {
+    console.error(err);
+    setDays([]);
+    toast.error(err.response?.data?.message || "Failed to fetch week data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+if (roadmaps.length === 0) {
     return (
       <div className="w-full h-screen flex flex-col gap-2 items-center justify-center">
         <p className="text-gray-500">No data available...</p>
@@ -50,25 +81,6 @@ if (loading) {
       </div>
     );
   }
-
-  // Fetch roadmap days for selected week
-  const fetchWeekData = async (roadmapId, week) => {
-    try {
-      setLoading(true);
-      const { data } = await axios.get(
-        `/api/user/roadmap/${roadmapId}?week=${week}`
-      );
-      if (data.success) {
-        setDays(data.days); // should return 7 days [{dayNumber, description, locked}]
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch week data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const toggleDay = (dayNumber) => {
     setOpenDay(openDay === dayNumber ? null : dayNumber);
   };
