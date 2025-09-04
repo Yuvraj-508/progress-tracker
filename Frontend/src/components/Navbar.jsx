@@ -29,6 +29,10 @@ export default function Navbar() {
 
          Progress
         </NavLink>
+         <NavLink to='/roadmap' className="bg-white text-blue-600 px-4 py-2 rounded-lg  ">
+
+         Roadmap
+        </NavLink>
       </div>
 
      {!user ? (
