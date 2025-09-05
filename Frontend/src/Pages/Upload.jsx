@@ -31,6 +31,8 @@ const [roadmaps, setRoadmaps] = useState([]); // fetched from backend
   );
 
   const [loading, setLoading] = useState(false);
+    const [dayLoading, setDayLoading] = useState(false);
+
     const [btnLoading, setBtnLoading] = useState(false);
 
 
@@ -79,7 +81,7 @@ setTopics(
 useEffect(() => {
   const checkDayData = async () => {
     if (!selectedWeek || !selectedDay) return;
-
+  setDayLoading(true);
     try {
       const { data } = await axios.get(
         `/api/user/taskplan/${selectedWeek}/${selectedDay}`
@@ -103,6 +105,8 @@ useEffect(() => {
         console.error(err);
         toast.error("Error checking day data");
       }
+    }finally {
+      setDayLoading(false);
     }
   };
 
@@ -295,26 +299,33 @@ if (loading) {
 
 
             {/* Dynamic topic inputs */}
-            {topics.map((topic, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <textarea
-                  className="mt-1 p-2 border rounded bg-white shadow resize-none flex-1"
-                  rows={2}
-                  placeholder={`Enter ${topic.section} topics...`}
-                  value={topic.value}
-                  onChange={(e) => handleInputChange(index, e.target.value)}
-                />
-                {topics.length > 1 && (
-                  <button
-                    type="button"
-                    className="bg-red-500 text-white p-2 rounded"
-                    onClick={() => removeInput(index)}
-                  >
-                    <Trash size={18} />
-                  </button>
-                )}
-              </div>
-            ))}
+       {/* Dynamic topic inputs */}
+{dayLoading ? (
+  <p className="text-gray-500">Loading day data...</p>
+) : (
+  topics.map((topic, index) => (
+    <div key={index} className="flex items-center gap-2">
+      <textarea
+        className="mt-1 p-2 border rounded bg-white shadow resize-none flex-1"
+        rows={2}
+        placeholder={`Enter ${topic.section} topics...`}
+        value={topic.value}
+        onChange={(e) => handleInputChange(index, e.target.value)}
+      />
+      {topics.length > 1 && (
+        <button
+          type="button"
+          className="bg-red-500 text-white p-2 rounded"
+          onClick={() => removeInput(index)}
+        >
+          <Trash size={18} />
+        </button>
+      )}
+    </div>
+  ))
+)}
+
+           
 
             <button
               type="button"
