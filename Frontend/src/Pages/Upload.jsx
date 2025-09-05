@@ -79,7 +79,8 @@ setTopics(
   }, [editData]);
 
 useEffect(() => {
-  const checkDayData = async () => {
+  if(editData?.mode !== "edit"){
+      const checkDayData = async () => {
     if (!selectedWeek || !selectedDay) return;
   setDayLoading(true);
     try {
@@ -111,6 +112,8 @@ useEffect(() => {
   };
 
   checkDayData();
+    // skip check if in edit mode for TaskPlan
+  }
 }, [selectedDay,selectedWeek]); 
 
   // Handle topic input (TaskPlan)
