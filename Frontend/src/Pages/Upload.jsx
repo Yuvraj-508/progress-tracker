@@ -1,13 +1,16 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState ,useEffect, use} from "react";
 import axios from "axios";
 import { useAppContext } from "../Context/Context";
 import toast from "react-hot-toast";
 import { Plus, Trash } from "lucide-react";
+import { useLocation } from "react-router";
 
 function Upload() {
-  const { monthYear, totalWeeks, getDaysForWeek } = useAppContext();
-  const [category, setCategory] = useState("TaskPlan");
-
+ const location = useLocation();
+ const editData = location.state; 
+ console.log(editData);
+  const { monthYear, totalWeeks, getDaysForWeek ,navigate} = useAppContext();
+ const [category, setCategory] = useState(editData?.category || "TaskPlan");
   // TaskPlan state
   const [selectedWeek, setSelectedWeek] = useState("");
   const [selectedDay, setSelectedDay] = useState("");
@@ -28,6 +31,83 @@ const [roadmaps, setRoadmaps] = useState([]); // fetched from backend
   );
 
   const [loading, setLoading] = useState(false);
+    const [btnLoading, setBtnLoading] = useState(false);
+
+
+    // 🔹 Fetch roadmap/taskplan data in edit mode
+  useEffect(() => {
+    if (editData?.mode === "edit") {
+      const fetchEditData = async () => {
+        try {
+          setLoading(true);
+
+          if (editData.category === "Roadmap") {
+            const { data } = await axios.get(
+              `/api/user/roadmap/${editData.roadmapId}?week=${editData.weekNumber}`
+            );
+            if (data.success) {
+              setTitle(data.roadmap.title);
+              setDays(data.days);
+            }
+          } else if (editData.category === "TaskPlan") {
+            const { data } = await axios.get(
+              `/api/user/taskplan/${editData.weekNumber}/${editData.dayNumber}`
+            );
+            if (data.success) {
+setTopics(
+  Object.entries(data.dayData.topics).map(([section, value]) => ({
+    section,
+    value,
+  }))
+);
+              setSelectedDay(editData.dayNumber);
+              setSelectedWeek(editData.weekNumber);
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to fetch edit data");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchEditData();
+    }
+  }, [editData]);
+
+useEffect(() => {
+  const checkDayData = async () => {
+    if (!selectedWeek || !selectedDay) return;
+
+    try {
+      const { data } = await axios.get(
+        `/api/user/taskplan/${selectedWeek}/${selectedDay}`
+      );
+
+      if (data.success && data.dayData) {
+        // ✅ already exists → alert user
+        const confirmUpdate = window.confirm(
+          `Data already exists for Week ${selectedWeek}, Day ${selectedDay}. 
+           Do you want to update it?`
+        );
+
+        if (!confirmUpdate) {
+          // ❌ reset day selection if user cancels
+          setSelectedDay("");
+        }
+      }
+    } catch (err) {
+      // ignore 404 (means no data yet), show error otherwise
+      if (err.response?.status !== 404) {
+        console.error(err);
+        toast.error("Error checking day data");
+      }
+    }
+  };
+
+  checkDayData();
+}, [selectedDay,selectedWeek]); 
 
   // Handle topic input (TaskPlan)
   const handleInputChange = (index, value) => {
@@ -55,90 +135,69 @@ const [roadmaps, setRoadmaps] = useState([]); // fetched from backend
   };
   //final submit
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setBtnLoading(true);
 
-    try {
-      let payload = {};
-      let endpoint = "";
+  try {
+    let payload = {};
+    let endpoint = "";
+    let method = editData?.mode === "edit" ? "put" : "post"; // ✅
 
-      if (category === "TaskPlan") {
-        if (!selectedWeek || !selectedDay) {
-          toast.error("Please select both week and day");
-          setLoading(false);
-          return;
-        }
-
-        const topicObj = topics.reduce((acc, curr) => {
+    if (category === "TaskPlan") {
+      payload = {
+        category,
+        monthYear,
+        week: Number(selectedWeek),
+        day: Number(selectedDay),
+        topics: topics.reduce((acc, curr) => {
           acc[curr.section] = curr.value;
           return acc;
-        }, {});
+        }, {}),
+        mode: "edit",   
+      };
+      endpoint = "/api/user/taskplan";
+    } else if (category === "Roadmap") {
+      const finalTitle =
+        title === "__new" || roadmaps.length === 0
+          ? newTitle.trim()
+          : title.trim();
 
-        payload = {
-          category,
-          monthYear,
-          week: Number(selectedWeek),
-          day: Number(selectedDay),
-          topics: topicObj,
-        };
-        endpoint = "/api/user/taskplan";
-      } 
-    else if (category === "Roadmap") {
-  // Use trimmed title
-  const finalTitle = title === "__new" ? newTitle.trim() : title.trim();
-
-  if (title === "__new" && !newTitle.trim()) {
-    alert("Please enter a new roadmap title");
-    return;
-  }
-
-  if (!selectedWeek) {
-    alert("Please select a week");
-    return;
-  }
-
-  payload = {
-    category,
-    monthYear,
-    weekNumber: Number(selectedWeek),
-    title: finalTitle, // ✅ important: use finalTitle
-    days,
-  };
-
-  endpoint = "/api/user/roadmap";
-}
-
-
-      const { data } = await axios.post(endpoint, payload);
-
-      if (data?.success) {
-        toast.success(data?.message || "Submitted successfully!");
-
-        setSelectedWeek("");
-        setSelectedDay("");
-        setTopics([
-          { section: "Dsa", value: "" },
-          { section: "Web", value: "" },
-          { section: "Aptitude", value: "" },
-          { section: "SoftSkills", value: "" },
-        ]);
-        setTitle("");
-        setDays(
-          Array.from({ length: 7 }, (_, i) => ({
-            dayNumber: i + 1,
-            description: "",
-          }))
-        );
-      } else {
-        toast.error(data?.message || "Something went wrong!");
+      if (!finalTitle) {
+        alert("Please enter a roadmap title");
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Something went wrong!");
-    } finally {
-      setLoading(false);
+
+      if (!selectedWeek) {
+        alert("Please select a week");
+        return;
+      }
+
+      payload = {
+        category,
+        monthYear,
+        weekNumber: Number(selectedWeek),
+        title: finalTitle,
+        days,
+      };
+      endpoint = "/api/user/roadmap";
     }
-  };
+
+    const { data } = await axios[method](endpoint, payload);
+
+    if (data.success) {
+      toast.success(data.message || (editData?.mode === "edit" ? "Updated successfully!" : "Submitted successfully!"));
+      navigate("/");
+    } else {
+      toast.error(data.message || "Something went wrong!");
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.message || "Something went wrong!");
+  } finally {
+    setBtnLoading(false);
+  }
+};
+
 
   useEffect(() => {
   const fetchRoadmaps = async () => {
@@ -155,7 +214,14 @@ const [roadmaps, setRoadmaps] = useState([]); // fetched from backend
   fetchRoadmaps();
 }, []);
 
-
+if (loading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        {/* Simple animated loader */}
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+      </div>
+    );
+  }
   return (
     <div className="w-full h-screen px-[6%]">
       <button className="bg-gray-200 text-black text-2xl shadow-lg rounded p-4 mb-7 mt-15">
@@ -167,9 +233,10 @@ const [roadmaps, setRoadmaps] = useState([]); // fetched from backend
         <label className="text-lg font-medium">
           Select Category:
           <select
-            className="ml-3 p-2 border rounded bg-white shadow"
+        className="ml-3 p-2 border rounded bg-white shadow disabled:bg-gray-100 disabled:cursor-not-allowed"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
+             disabled={editData?.mode  === "edit"}
           >
             <option value="TaskPlan">Task Plan</option>
             <option value="Roadmap">Roadmap</option>
@@ -179,46 +246,53 @@ const [roadmaps, setRoadmaps] = useState([]); // fetched from backend
         {/* TaskPlan UI */}
         {category === "TaskPlan" && (
           <>
-            {/* Week select */}
-            <label className="text-lg font-medium">
-              Select Week:
-              <select
-                className="ml-3 p-2 border rounded bg-white shadow"
-                value={selectedWeek}
-                onChange={(e) => {
-                  setSelectedWeek(e.target.value);
-                  setSelectedDay("");
-                }}
-              >
-                <option value="">--Choose Week--</option>
-                {Array.from({ length: totalWeeks }, (_, i) => i + 1).map(
-                  (week) => (
-                    <option key={week} value={week}>
-                      Week {week}
-                    </option>
-                  )
-                )}
-              </select>
-            </label>
+          {/* Week select */}
+<label className="text-lg font-medium">
+  Select Week:
+  <select
+    className="ml-3 p-2 border rounded bg-white shadow disabled:bg-gray-100 disabled:cursor-not-allowed"
+    value={selectedWeek}
+    onChange={(e) => {
+      if (editData?.mode  !== "edit") {  // ✅ prevent changes in edit mode
+        setSelectedWeek(e.target.value);
+        setSelectedDay("");
+      }
+    }}
+    disabled={editData?.mode  === "edit"} // ✅ disable dropdown if edit
+  >
+    <option value="">--Choose Week--</option>
+    {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
+      <option key={week} value={week}>
+        Week {week}
+      </option>
+    ))}
+  </select>
+</label>
 
-            {/* Day select */}
-            {selectedWeek && (
-              <label className="text-lg font-medium">
-                Select Day:
-                <select
-                  className="ml-3 p-2 border rounded bg-white shadow"
-                  value={selectedDay}
-                  onChange={(e) => setSelectedDay(e.target.value)}
-                >
-                  <option value="">--Choose Day--</option>
-                  {getDaysForWeek(selectedWeek).map((day) => (
-                    <option key={day} value={day}>
-                      Day {day}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
+{/* Day select */}
+{selectedWeek && (
+  <label className="text-lg font-medium">
+    Select Day:
+    <select
+      className="ml-3 p-2 border rounded bg-white shadow disabled:bg-gray-100 disabled:cursor-not-allowed"
+      value={selectedDay}
+      onChange={(e) => {
+        if (editData?.mode !== "edit") {  // ✅ prevent changes in edit mode
+          setSelectedDay(e.target.value);
+        }
+      }}
+      disabled={editData?.mode  === "edit"} // ✅ disable dropdown if edit
+    >
+      <option value="">--Choose Day--</option>
+      {getDaysForWeek(selectedWeek).map((day) => (
+        <option key={day} value={day}>
+          Day {day}
+        </option>
+      ))}
+    </select>
+  </label>
+)}
+
 
             {/* Dynamic topic inputs */}
             {topics.map((topic, index) => (
@@ -273,8 +347,11 @@ const [roadmaps, setRoadmaps] = useState([]); // fetched from backend
     </label>
 
     {/* Title selection / input */}
-    <div className="mt-4 flex flex-col gap-2">
-      <label className="font-medium">Roadmap Title</label>
+   <div className="mt-4 flex flex-col gap-2">
+  <label className="font-medium">Roadmap Title</label>
+
+  {roadmaps.length > 0 ? (
+    <>
       <select
         className="p-2 border rounded bg-white shadow"
         value={title}
@@ -299,7 +376,19 @@ const [roadmaps, setRoadmaps] = useState([]); // fetched from backend
           onChange={(e) => setNewTitle(e.target.value)}
         />
       )}
-    </div>
+    </>
+  ) : (
+    // If no roadmaps → always show input
+    <input
+      type="text"
+      placeholder="Enter new roadmap title"
+      className="p-2 border rounded bg-white shadow"
+      value={newTitle}
+      onChange={(e) => setNewTitle(e.target.value)}
+    />
+  )}
+</div>
+
 
     {/* 7 Days inputs */}
     <div className="mt-4 flex flex-col gap-4">
@@ -322,12 +411,12 @@ const [roadmaps, setRoadmaps] = useState([]); // fetched from backend
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={ btnLoading}
           className={`bg-blue-400 text-white rounded-2xl p-3 cursor-pointer flex items-center justify-center gap-2 ${
-            loading ? "opacity-70 cursor-not-allowed" : ""
+            btnLoading ? "opacity-70 cursor-not-allowed" : ""
           }`}
         >
-          {loading ? (
+          { btnLoading ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
               <span>Submitting...</span>

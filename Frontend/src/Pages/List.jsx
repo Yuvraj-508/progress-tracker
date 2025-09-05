@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Check } from "lucide-react";
+import { ChevronDown, ChevronUp, Check,Edit,Pencil } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -12,6 +12,8 @@ const { navigate } = useAppContext();
   const [dayData, setDayData] = useState(null);
     const [loading, setLoading] = useState(false); 
   const [lockLoading, setLockLoading] = useState({}); 
+  const [editing, setEditing] = useState(null); // {sectionTitle, topicIndex}
+  const [editValue, setEditValue] = useState("");
 // { Dsa: false, Web: false, ... }
 
   console.log(openIndex);
@@ -34,7 +36,7 @@ const { navigate } = useAppContext();
     };
     fetchData();
   }, [day, week]);
-
+console.log(dayData);
   // Toggle expand/collapse
   const toggleSection = (index) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -68,6 +70,20 @@ const toggleLock = async (sectionTitle, isLocked) => {
     setLockLoading(prev => ({ ...prev, [sectionTitle]: false }));
   }
 };
+
+const handleEdit = (sectionId) => {
+  navigate(`/upload?mode=edit`, {
+  state: {
+    mode: "edit",
+    category: "TaskPlan",
+    roadmapId: sectionId,
+    weekNumber: Number(week), // ✅ ensure number
+    dayNumber: Number(day),   // ✅ ensure number
+  },
+  });
+
+};
+
 
 
    if (loading) {
@@ -123,67 +139,87 @@ console.log(sections);
 
   {/* Sections */}
 
-  {sections.map((section, index) => (
-    <div
-      key={index}
-      className="w-[45%] bg-white rounded-2xl shadow-md   overflow-hidden"
+
+{sections.map((section, index) => (
+  <div
+    key={index}
+    className="w-[45%] bg-white rounded-2xl shadow-md overflow-hidden"
+  >
+    {/* Section Header */}
+    <button
+      className="flex justify-between items-center p-4 bg-gray-200 hover:bg-gray-300 transition-all font-semibold cursor-pointer text-lg w-full"
+      onClick={() => toggleSection(index)}
     >
-      {/* Section Header */}
-      <button
-        className="flex justify-between items-center p-4 bg-gray-200 hover:bg-gray-300 transition-all font-semibold cursor-pointer text-lg w-full"
-        onClick={() => toggleSection(index)}
-      >
-        <span>{section.title}</span>
-        <span>
-          {openIndex === index ? (
-            <ChevronUp className="w-5 h-5" />
-          ) : (
-            <ChevronDown className="w-5 h-5" />
-          )}
-        </span>
-      </button>
+      <span>{section.title}</span>
+      <span>
+        {openIndex === index ? (
+          <ChevronUp className="w-5 h-5" />
+        ) : (
+          <ChevronDown className="w-5 h-5" />
+        )}
+      </span>
+    </button>
 
-      {/* Section Content */}
+    {/* Section Content */}
+    <div
+      className={`overflow-hidden transition-all duration-300 ${
+        openIndex === index ? "max-h-[1000px]" : "max-h-0"
+      }`}
+    >
+      <div className="p-3 flex flex-col gap-2">
+        {section.topics.map((topic, i) => (
+          <div
+            key={i}
+            className="flex justify-between items-center border-b last:border-b-0"
+          >
+            <span
+              className={`flex items-center gap-2 ${
+                section.locked ? "line-through text-gray-400" : "text-gray-800"
+              }`}
+            >
+              <span className="font-semibold">{i + 1}.</span>
+              <span className="break-words">{topic}</span>
+            </span>
 
-<div
-  className={`overflow-hidden transition-all  duration-300 ${
-    openIndex === index ? "max-h-[1000px]" : "max-h-0"
+            <div className="flex items-center gap-2">
+              {/* Edit Button */}
+         <button
+  onClick={() => handleEdit(i)} 
+  disabled={section.locked}
+  className={`w-8 h-8 flex items-center justify-center rounded-full p-1 transition-colors ${
+    section.locked
+      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+      : "bg-blue-600 hover:bg-blue-700 text-white"
   }`}
 >
-  <div className="p-3 flex flex-col gap-2"> {/* padding wrapper */}
-    {section.topics.map((topic, i) => (
-      <div
-        key={i}
-        className="flex justify-between items-center border-b last:border-b-0"
-      >
-        <span
-          className={`flex items-center gap-2 ${
-            section.locked ? "line-through text-gray-400" : "text-gray-800"
-          }`}
-        >
-          <span className="font-semibold">{i + 1}.</span>
-          <span className="break-words">{topic}</span>
-        </span>
-       <button
-  onClick={() => toggleLock(section.title, section.locked)}
-  className={`w-8 h-8 flex items-center justify-center cursor-pointer rounded-full p-1 transition-colors ${
-    section.locked ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
-  }`}
->
-  {lockLoading[section.title] ? (
-    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-  ) : (
-    <Check stroke="white" className="w-4 h-4" />
-  )}
+  <Pencil className="w-4 h-4" />
 </button>
 
-      </div>
-    ))}
-  </div>
-</div>
 
+
+              {/* Lock Button */}
+              <button
+                onClick={() => toggleLock(section.title, section.locked)}
+                className={`w-8 h-8 flex items-center justify-center cursor-pointer rounded-full p-1 transition-colors ${
+                  section.locked
+                    ? "bg-gray-400"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
+              >
+                {lockLoading[section.title] ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <Check stroke="white" className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
-  ))}
+  </div>
+))}
+
   </div>
 
 

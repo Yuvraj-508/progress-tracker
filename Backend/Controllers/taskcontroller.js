@@ -6,7 +6,7 @@ export const taskPlan = async (req, res) => {
     const { monthYear, week, day,topics } = req.body;
     const { id: userId } = req.user;
 
-    console.log(req.body);
+    console.log("created",req.body);
 
     let taskPlan = await Task.findOne({ userId, monthYear, week });
     console.log("Existing Task Plan:", taskPlan);
@@ -15,15 +15,21 @@ export const taskPlan = async (req, res) => {
       const existingDayIndex = taskPlan.days.findIndex(d => d.day === day);
 
     console.log("Existing Day Index:", existingDayIndex);
-        if (existingDayIndex !== -1) {
-          // Update existing day's topics properly
-          Object.keys(topics).forEach(key => {
-          taskPlan.days[existingDayIndex].topics.set(key, topics[key]); // Map support
-        });
-        } else {
-          // Add new day
-       taskPlan.days.push({ day, topics });
-        }
+       if (existingDayIndex !== -1) {
+  if (req.body.mode === "edit") {
+    // 🔄 Replace entire topics map
+    taskPlan.days[existingDayIndex].topics = new Map(Object.entries(topics));
+  } else {
+    // 🆕 Create mode → merge topics
+    Object.keys(topics).forEach(key => {
+      taskPlan.days[existingDayIndex].topics.set(key, topics[key]);
+    });
+  }
+} else {
+  // New day
+  taskPlan.days.push({ day, topics });
+}
+
 
 
       // Mark the 'days' field as modified so Mongoose updates it
@@ -56,7 +62,7 @@ export const getTaskPlanByWeekDay = async (req, res) => {
     const { week, day } = req.params;
     const { id: userId } = req.user;
    
-
+  //  console.log("Fetching task plan for user:", userId, "week:", week, "day:", day);
     // Find task plan for that user & week
     const taskPlan = await Task.findOne({ userId, week });
 
@@ -69,8 +75,8 @@ export const getTaskPlanByWeekDay = async (req, res) => {
     if (!dayData) {
       return res.status(404).json({ success: false, message: "No data for this day" });
     }
-
-    res.status(200).json({ success: true, dayData });
+  console.log("Day Data:", dayData, "Task Plan:", taskPlan);
+    res.status(200).json({ success: true, dayData,taskPlan });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: err.message });

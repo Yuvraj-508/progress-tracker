@@ -4,6 +4,7 @@ import authUser from "../Middleware/authUser.js";
 import { createRoadmap, getRoadmapByWeek, getRoadmaps } from "../Controllers/Roadmap.js";
 const taskRouter = express.Router();
 
+taskRouter.put("/taskplan", authUser,taskPlan);
 taskRouter.post("/taskplan", authUser,taskPlan);
 taskRouter.get("/taskplan/:week/:day", authUser, getTaskPlanByWeekDay);
 taskRouter.put("/taskplan/:week/:day/lock", authUser, dataLocked);
