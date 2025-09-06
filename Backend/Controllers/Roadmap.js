@@ -76,10 +76,9 @@ export const getRoadmaps = async (req, res) => {
 
 export const getRoadmapByWeek = async (req, res) => {
   try {
-    const { week } = req.query;
-    const { id: roadmapId } = req.params;
+    const { roadMap, week } = req.query;
     const { id: userId } = req.user;
-
+    // console.log("ri:",road,week)
     if (!week) {
       return res.status(400).json({
         success: false,
@@ -87,7 +86,7 @@ export const getRoadmapByWeek = async (req, res) => {
       });
     }
 
-    const roadmap = await Roadmap.findOne({ _id: roadmapId, userId });
+    const roadmap = await Roadmap.findOne({ _id: roadMap, userId });
 
     if (!roadmap) {
       return res.status(404).json({
@@ -118,6 +117,49 @@ export const getRoadmapByWeek = async (req, res) => {
       success: false,
       message: "Server error while fetching roadmap week",
     });
+  }
+};
+
+export const roadDataLocked = async (req, res) => {
+  try {
+    const { weekNumber, dayNumber } = req.query; // ✅ expect both
+    const { id: userId } = req.user;
+
+    // Find roadmap of this user
+    const roadmap = await Roadmap.findOne({ userId });
+    if (!roadmap) {
+      return res.status(404).json({ success: false, message: "Roadmap not found" });
+    }
+
+    // Find the requested week
+    const week = roadmap.weeks.find(w => w.weekNumber === Number(weekNumber));
+    if (!week) {
+      return res.status(404).json({ success: false, message: "Week not found" });
+    }
+
+    // Find the requested day inside this week
+    const day = week.days.find(d => d.dayNumber === Number(dayNumber));
+    if (!day) {
+      return res.status(404).json({ success: false, message: "Day not found" });
+    }
+
+    // Check if already locked
+    if (day.locked) {
+      return res.status(400).json({ success: false, message: `Day ${dayNumber} is already locked` });
+    }
+
+    // Lock the day
+    day.locked = true;
+    await roadmap.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Day ${dayNumber} of Week ${weekNumber} locked successfully`,
+      days: week.days,
+    });
+  } catch (err) {
+    console.error("roadDataLocked error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 

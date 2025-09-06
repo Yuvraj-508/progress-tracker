@@ -13,10 +13,18 @@ const Days = () => {
   // Get relative days (1-7) for selected week
   const daysInWeek = getDaysForWeek(weekNum);
 
+const today = new Date();
+const formatted = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+// console.log(formatted); // "6/9/2025"
+
+
   return (
     <div className='w-full h-screen px-[6%]'>
-      <button className='bg-gray-200 text-black text-2xl shadow-lg rounded p-4 mb-7 mt-15'>
+      <button className='bg-gray-200 text-black text-2xl shadow-lg rounded p-4 mb-7 mt-15 flex gap-5'>
         Tasks for Week {week}
+        <p>
+          {formatted}
+        </p>
       </button>
 
       <div className='flex flex-wrap gap-5'>

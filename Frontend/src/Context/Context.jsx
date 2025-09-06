@@ -87,9 +87,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  
-
-
 
 if (loading) {
     return (
@@ -111,7 +108,7 @@ if (loading) {
     setLoading,
     userStatus,
     handleLogout,
-        totalDays,
+    totalDays,
     totalWeeks,
     getDaysForWeek,        // relative 1–7 inside week
     getAbsoluteDaysForWeek // ✅ export logout so you can use it anywhere
