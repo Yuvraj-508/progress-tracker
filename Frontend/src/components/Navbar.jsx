@@ -25,7 +25,7 @@ export default function Navbar() {
           Upload
         </NavLink>
 
-        <NavLink to='/progress' className="bg-white text-blue-600 px-4 py-2 rounded-lg  ">
+        <NavLink to='/weekly-report' className="bg-white text-blue-600 px-4 py-2 rounded-lg  ">
 
          Progress
         </NavLink>

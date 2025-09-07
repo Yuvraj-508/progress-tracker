@@ -10,6 +10,7 @@ import { useAppContext } from './Context/Context'
 import List from './Pages/List'
 import Upload from './Pages/Upload'
 import Roadmap from './Pages/Roadmap'
+import WeeklyReport from './Pages/WeeklyReport'
 
 function App() {
   const {user,axios,setUser,setLoading}=useAppContext();
@@ -29,6 +30,8 @@ function App() {
             <Route path='/task/:week/:day' element={<List/>} />
             <Route path='/upload' element={ user?<Upload/>:<Form/> } />
               <Route path='/roadmap' element={ user?<Roadmap/>:<Form/> } />
+                            <Route path='/weekly-report' element={ user?<WeeklyReport/>:<Form/> } />
+
         </Routes>
       </div>
 

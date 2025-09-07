@@ -1,9 +1,9 @@
 import express from "express";
-import { dataLocked, getTaskPlanByWeekDay, taskPlan } from "../Controllers/taskcontroller.js";
+import { dataLocked, getTaskPlanByWeekDay, getWeeklyReport, taskPlan } from "../Controllers/taskcontroller.js";
 import authUser from "../Middleware/authUser.js";
 import { createRoadmap, getRoadmapByWeek, getRoadmaps, roadDataLocked } from "../Controllers/Roadmap.js";
 const taskRouter = express.Router();
-
+taskRouter.get("/taskplan/weekly-report",authUser,getWeeklyReport);
 taskRouter.put("/taskplan", authUser,taskPlan);
 taskRouter.post("/taskplan", authUser,taskPlan);
 taskRouter.get("/taskplan/:week/:day", authUser, getTaskPlanByWeekDay);

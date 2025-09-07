@@ -112,4 +112,34 @@ console.log("Locked section:", dayData);
   }
 };
 
+export const getWeeklyReport = async (req, res) => {
+  try {
+    const { id: userId } = req.user;
 
+    // Fetch all task plans of this user
+    const taskPlans = await Task.find({ userId }).sort({ week: 1 });
+
+    // Transform data for frontend
+    const weeklyReport = taskPlans.map(tp => {
+      const weekLabel = `Week ${tp.week}`; // you can append dynamic dates later
+      const daily = tp.days.map(day => {
+        const totalSections = day.topics.size || 1; // avoid divide by zero
+        const completedSections = Array.from(day.locked.values()).filter(Boolean).length;
+        const progressPercent = Math.round((completedSections / totalSections) * 100);
+
+        return {
+          dayNumber: day.day,
+          description: Array.from(day.topics.values()).join(", "),
+          progressPercent,
+        };
+      });
+
+      return { weekLabel, daily };
+    });
+
+    res.json({ success: true, weeklyReport });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
