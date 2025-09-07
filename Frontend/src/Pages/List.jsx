@@ -36,6 +36,7 @@ const { navigate } = useAppContext();
     };
     fetchData();
   }, [day, week]);
+  
 console.log(dayData);
   // Toggle expand/collapse
   const toggleSection = (index) => {

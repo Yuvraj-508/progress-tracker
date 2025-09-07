@@ -136,7 +136,7 @@ if (data.success) {
       checkDayData();
       // skip check if in edit mode for TaskPlan
     }
-  }, [selectedDay, selectedWeek]);
+  }, [selectedDay,selectedWeek]);
 
   // Fetch existing roadmaps for title dropdown
   useEffect(() => {
@@ -342,7 +342,7 @@ if (data.success) {
                     className="mt-1 p-2 border rounded bg-white shadow resize-none flex-1"
                     rows={2}
                     placeholder={`Enter ${topic.section} topics...`}
-                    value={topic.value || days}
+                    value={topic.value }
                     onChange={(e) => handleInputChange(index, e.target.value)}
                   />
                   {topics.length > 1 && (
