@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAppContext } from "../Context/Context.jsx";
 import toast from "react-hot-toast";
+import { Mail, Linkedin } from "lucide-react";
 
 function Form() {
   const { setUser, navigate, axios } = useAppContext();
@@ -66,31 +67,57 @@ function Form() {
       setLoading(false);
     }
   };
+
+  const handleGoogleLogin = () => {
+    window.open(
+      `${import.meta.env.VITE_BACKEND_URL}/user/auth/google`,
+      "_self"
+    );
+  };
   return (
-    <div className="w-full h-screen flex items-center justify-center bg-gray-100">
+     <div className="w-full h-screen flex items-center justify-center bg-gray-100">
       <form
         onClick={(e) => e.stopPropagation()}
         className="flex flex-col gap-4 m-auto items-start p-8 py-12 w-80 sm:w-[352px] rounded-lg shadow-xl border border-gray-200 bg-white"
       >
+        {/* Social login buttons */}
+        <div className="flex flex-col gap-3 w-full mb-4">
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="flex items-center gap-3 w-full justify-center border border-gray-300 py-2 rounded-md hover:bg-gray-50 transition"
+          >
+            <Mail className="text-red-500 w-5 h-5" />
+            <span>Continue with Google</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="flex items-center gap-3 w-full justify-center border border-gray-300 py-2 rounded-md hover:bg-gray-50 transition"
+          >
+            <Linkedin className="text-blue-600 w-5 h-5" />
+            <span>Continue with LinkedIn</span>
+          </button>
+        </div>
+
         <p className="text-2xl font-medium m-auto">
           <span className="text-primary">User</span>{" "}
           {state === "login" ? "Login" : "Sign Up"}
         </p>
 
         {state === "register" && (
-          <>
-            <div className="w-full">
-              <p>Name</p>
-              <input
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                placeholder="type here"
-                className="border border-gray-200 rounded w-full p-2 mt-1 outline-indigo-500"
-                type="text"
-                required
-              />
-            </div>
-          </>
+          <div className="w-full">
+            <p>Name</p>
+            <input
+              onChange={(e) => setName(e.target.value)}
+              value={name}
+              placeholder="type here"
+              className="border border-gray-200 rounded w-full p-2 mt-1 outline-indigo-500"
+              type="text"
+              required
+            />
+          </div>
         )}
 
         <div className="w-full">
@@ -121,9 +148,7 @@ function Form() {
           <p>
             Already have an account?{" "}
             <span
-              onClick={() => {
-                setState("login");
-              }}
+              onClick={() => setState("login")}
               className="text-primary cursor-pointer"
             >
               click here
@@ -143,7 +168,7 @@ function Form() {
 
         <button
           onClick={state === "register" ? handleRegister : handleLogin}
-          disabled={loading} // disable while loading
+          disabled={loading}
           className={`bg-green-400 hover:bg-primary-dull transition-all text-white w-full py-2 rounded-md cursor-pointer flex items-center justify-center gap-2 ${
             loading ? "opacity-70 cursor-not-allowed" : ""
           }`}
@@ -161,6 +186,7 @@ function Form() {
         </button>
       </form>
     </div>
+  
   );
 }
 
